@@ -21,6 +21,7 @@
 
 var endianToggle = require('endian-toggle');
 var moment = require('moment');
+var SHA256 = require("crypto-js/sha256");
 
 var header = {
   version: 1,
@@ -55,7 +56,22 @@ var headerEncoded = {
 
 console.log(headerEncoded);
 
+// the full header should be 80-bytes
+var headerFull = headerEncoded.version + headerEncoded.hashPrevBlock + headerEncoded.hashMerkleRoot + headerEncoded.time + headerEncoded.bits + headerEncoded.nonce;
+var headerFullBin = new Buffer(headerFull, 'hex');
 
+console.log(headerFullBin);
+// console.log(sha256x2(headerFullBin));
+// sha256x2
+
+console.log(SHA256(headerFull).toString());
+console.log(SHA256(headerFullBin).toString());
+
+
+function sha256x2(hexString) {
+  var buffer = new Buffer(hexString, 'hex');
+
+}
 
 
 function swapEndian(hex, bits) {
