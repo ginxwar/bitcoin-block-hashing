@@ -21,7 +21,7 @@
 
 var endianToggle = require('endian-toggle');
 var moment = require('moment');
-var SHA256 = require("crypto-js/sha256");
+var crypto = require('crypto');
 
 var header = {
   version: 1,
@@ -32,6 +32,7 @@ var header = {
   nonce: 2504433986
 };
 
+// the full header is just the concatenation of all of these
 // header_hex = ("01000000" +
 //     "81cd02ab7e569e8bcd9317e2fe99f2de44d49ab2b8851ba4a308000000000000" +
 //     "e320b6c2fffc8d750423db8b1eb942ae710e951ed797f7affc8892b0f1fc122b" +
@@ -58,21 +59,21 @@ console.log(headerEncoded);
 
 // the full header should be 80-bytes
 var headerFull = headerEncoded.version + headerEncoded.hashPrevBlock + headerEncoded.hashMerkleRoot + headerEncoded.time + headerEncoded.bits + headerEncoded.nonce;
-var headerFullBin = new Buffer(headerFull, 'hex');
 
-console.log(headerFullBin);
-// console.log(sha256x2(headerFullBin));
-// sha256x2
+console.log("double sha256: ", swapEndian(sha256x2(headerFull), 256));
 
-console.log(SHA256(headerFull).toString());
-console.log(SHA256(headerFullBin).toString());
+function sha256x2(hex) {
+  // the hex string needs to be a binary object, aka Buffer
+  var buffer = new Buffer(hex, 'hex');
 
+  // first round takes in buffer and outputs a new buffer object
+  var hashRound1 = crypto.createHash('sha256').update(buffer).digest();
 
-function sha256x2(hexString) {
-  var buffer = new Buffer(hexString, 'hex');
+  // second round takes in buffer and outputs hex object
+  var hashRound2 = crypto.createHash('sha256').update(hashRound1).digest('hex');
 
+  return hashRound2;
 }
-
 
 function swapEndian(hex, bits) {
   var buffer = new Buffer(hex, 'hex');
